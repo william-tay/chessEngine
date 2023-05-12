@@ -13,7 +13,7 @@ How to Use Chess Engine:
 
 2.) You will be prompted to select a difficulty, there is hard or easy, the only difference is the depth of their search. Bear in mind that the Hard engine may take about a minute to compute an answer in the early game 
 
-3.) Upon selecting a difficulty, you will be thrown into the game (playing as white) and asked to input your starting move.  
+3.) Upon selecting a difficulty, you will be thrown into the game (playing as white) and asked to input your starting move. Inputs are typed into the terminal when prompted by the engine. Inputs are made with standard Algebraic Notation (Ex. Ne8, Ke3, Bxe7, Qxc7+, etc.) OTHER WAYS OF INPUT WILL THROW AN ILLEGAL MOVE AND PROMPT YOU AGAIN!
 
 4.) The engine will then respond with its own move and spit out the move to the terminal. 
 
