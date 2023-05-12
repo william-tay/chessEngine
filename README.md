@@ -1,6 +1,12 @@
 # chessEngine
 Short chess engineproject I'm working on.
 
+
+ ***IMPORTANT***
+ The ASCII text that is outputted to the terminal that represents the board and the moves is not that great. I would recommend playing along using [www.chess.com/analysis](www.chess.com/analysis) in order to better visualize the game. Bear in mind there are no take backs with the engine so be precise with your inputs...
+ 
+ Have Fun!
+ 
 How to Use Chess Engine:  
 
 1.) Run the program in a Python environment or using a Python IDE.  
