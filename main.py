@@ -1,6 +1,5 @@
-from chess import Board, Move, STARTING_FEN, polyglot
 import chess
-import random
+
 
 piece_values = {
     chess.PAWN: 100,
@@ -98,63 +97,86 @@ black_material = 0
 white_material = 0
 who2move = 0
 board = chess.Board(chess.STARTING_FEN)
-
+best = 0
+after_move = 0
 
 def main():
-    # with chess.polyglot.open_reader("baron30.bin") as reader:
-    # for entry in reader.find_all(board):
-    # print(entry.move, entry.weight, entry.learn)
+    global level
+    while True:
+        try:
+            difficulty = input("What difficulty would you like? (Hard / Easy ): ").lower().strip()
+            if difficulty == "hard":
+                print("Hard Selected!")
+                level = 5
+                break
+            elif difficulty == "easy":
+                print("Easy Selected!")
+                level = 3
+                break
+            else:
+                print("Not a valid option")
+        except:
+            print("Error")
     while not board.is_checkmate():
-        # print(board.legal_moves.count())
         if board.turn:
-            result = eval() * 1
-            print(f'This is white eval: {result}')
+            result = evaluate(board, board.turn)
+
         else:
-            result = eval() * -1
-            print(f'This is black eval: {result}')
+            result = evaluate(board.turn)
+
         legalMoves = [board.legal_moves]
         playerMove(legalMoves)
+        if board.is_game_over():
+            print("Good Game!")
+            break
         print(f'{board}\n')
         if board.turn:
-            result = eval() * 1
-            print(f'This is white eval: {result}')
+            result = evaluate(board, board.turn)
+
         else:
-            result = eval() * -1
-            print(f'This is black eval: {result}')
+            result = evaluate(board, board.turn)
+
         computerMove()
         print(f'{board}\n')
 
 
-"""
-This is going to be the start of alphaBeta, however it is a little hard to implement because many of the evaluation logic
-is still missing, for example obvious blunders where pieces are being lost, currently only looks at heat map
-"""
+def alphaBeta(board, depth, alpha, beta, maximizingPlayer):
+    if depth == 0 or board.is_game_over():
+        return evaluate(board, not board.turn), None
+
+    if maximizingPlayer:
+        maxEval = float('-inf')
+        bestMove = None
+        for move in board.legal_moves:
+            board.push(move)
+            eval, _ = alphaBeta(board, depth-1, alpha, beta, False)
+            board.pop()
+            if eval > maxEval:
+                maxEval = eval
+                bestMove = move
+            alpha = max(alpha, eval)
+            if beta <= alpha:
+                break
+        return maxEval, bestMove
+    else:
+        minEval = float('inf')
+        bestMove = None
+        for move in board.legal_moves:
+            board.push(move)
+            eval, _ = alphaBeta(board, depth-1, alpha, beta, True)
+            board.pop()
+            if eval < minEval:
+                minEval = eval
+                bestMove = move
+            beta = min(beta, eval)
+            if beta <= alpha:
+                break
+        return minEval, bestMove
 
 
-def alphaBeta(moves):
-    best = 0
-    print(board.turn)
-    for i in moves:
-        print(i)
-        current_board = eval()
-        print(i in board.legal_moves)
-        board.push_uci(str(i))
-        after_move = eval()
-        diff = current_board - after_move
-        if diff < best:
-            best = diff
-        print(diff)
-        board.pop()
 
-
-# print(board.legal_moves)
-# print(chess.Move.from_uci("g1f3") in board.legal_moves)
-# print(board)
-# board.san(chess.Move(chess.E2, chess.E4))
-# board.parse_san('Nf3')
-# print(board.variation_san([chess.Move.from_uci(m) for m in ["e2e4", "e7e5", "g1f3"]]))
 def playerMove(legal):
-    print(legal)
+    print(f'Some possible moves for you: {legal}')
     checkMaterial()
     while True:
         try:
@@ -166,27 +188,25 @@ def playerMove(legal):
 
 
 def computerMove():
-    real = list(board.legal_moves)
-    alphaBeta(real)
+    print('Thinking...')
+    print('===========================')
 
-    #listRand = real
+    best_score, best_move = alphaBeta(board, level, float('-inf'), float('inf'), True)
+    print(board.turn)
+    board.push(best_move)
 
-  #  test = random.choice(listRand)
+    print(best_move)
 
-   # test1 = str(test)
-  #  board.push_uci(test1)
-
-
-def eval():
+def evaluate(board, color):
     evals = 0
     for squares in chess.SQUARES:
         piece = board.piece_type_at(squares)
-        checkPawn = chess.Piece(1, board.turn)
-        checkKnight = chess.Piece(2, board.turn)
-        checkBishop = chess.Piece(3, board.turn)
-        checkRook = chess.Piece(4, board.turn)
-        checkQueen = chess.Piece(5, board.turn)
-        checkKing = chess.Piece(6, board.turn)
+        checkPawn = chess.Piece(1, color)
+        checkKnight = chess.Piece(2, color)
+        checkBishop = chess.Piece(3, color)
+        checkRook = chess.Piece(4, color)
+        checkQueen = chess.Piece(5, color)
+        checkKing = chess.Piece(6, color)
         check = chess.Piece(piece, board.color_at(squares))
 
         if checkPawn.color and check.color and checkPawn.piece_type == check.piece_type:
@@ -215,24 +235,37 @@ def eval():
     # evals = evals + king_endgame_heat_map[squares]
     material = checkMaterial()
     evals = evals + material
-    return evals
+   # attacking(board, board.turn)
+    # print("---------------------------------------------------------------------------")
+    if color:
+        return evals
+    else:
+        return evals * -1
+
+#def attacking(board, turn):
+   # starting_material = checkMaterial()
+   # if turn:
+
+   # else:
+       # board.attacks()
 
 
 def checkMaterial():
-    global white_material
-    global black_material
+    global white_material, black_material, amount_attacked, attackers
     white_material = 0
     black_material = 0
     for squares in chess.SQUARES:
-        if board.piece_at(chess.D4):
-            continue
         piece = board.piece_at(squares)
+        #amount_attacked = board.attacks(squares)
+       # attackers = board.attackers(board.turn, squares)
         if not piece:
             continue
         if piece.color == chess.WHITE:
+
             white_material += piece_values[piece.piece_type]
         elif piece.color == chess.BLACK:
             black_material += piece_values[piece.piece_type]
+  #  print(f'Attacked:\n{amount_attacked} \n Attackers: \n{attackers}')
     if board.turn:
         return white_material
     else:
